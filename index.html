@@ -1745,28 +1745,67 @@
         </div>
         <div class="rates-grid">
             <div class="rate-card">
-                <div class="rate-season">Basse saison</div>
-                <div class="rate-name">Mai – Novembre</div>
-                <div class="rate-price">2 800€</div>
+                <div class="rate-season">March</div>
+                <div class="rate-name">7 Mar, 2026 - 3 Apr, 2026</div>
+                <div class="rate-price">€3,800.00</div>
                 <div class="rate-unit">Par semaine</div>
-                <div class="rate-details">Minimum 7 nuits<br>Jusqu'à 12 personnes<br>Charges incluses</div>
-                <div class="rate-months">mai · juin · juillet · août · septembre · octobre · novembre</div>
-            </div>
-            <div class="rate-card featured">
-                <div class="rate-season">Haute saison</div>
-                <div class="rate-name">Décembre – Avril</div>
-                <div class="rate-price">3 800€</div>
-                <div class="rate-unit">Par semaine</div>
-                <div class="rate-details">Minimum 7 nuits<br>Jusqu'à 12 personnes<br>Charges incluses</div>
-                <div class="rate-months">décembre · janvier · février · mars · avril</div>
+                <div class="rate-details">7 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
             </div>
             <div class="rate-card">
-                <div class="rate-season">Noël & Nouvel An</div>
-                <div class="rate-name">20 déc. – 5 jan.</div>
-                <div class="rate-price">4 500€</div>
+                <div class="rate-season">APRIL</div>
+                <div class="rate-name">4 Apr, 2026 - 8 May, 2026</div>
+                <div class="rate-price">€4,200.00</div>
                 <div class="rate-unit">Par semaine</div>
-                <div class="rate-details">Minimum 14 nuits<br>Jusqu'à 12 personnes<br>Charges incluses</div>
-                <div class="rate-months">20 décembre → 5 janvier</div>
+                <div class="rate-details">7 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-season">SPRING</div>
+                <div class="rate-name">9 May, 2026 - 29 Jun, 2026</div>
+                <div class="rate-price">€2,800.00</div>
+                <div class="rate-unit">Par semaine</div>
+                <div class="rate-details">5 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-season">AUTUMN</div>
+                <div class="rate-name">30 Aug, 2026 - 16 Oct, 2026</div>
+                <div class="rate-price">€2,800.00</div>
+                <div class="rate-unit">Par semaine</div>
+                <div class="rate-details">5 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-season">TOUSSAINT</div>
+                <div class="rate-name">17 Oct, 2026 - 6 Nov, 2026</div>
+                <div class="rate-price">€3,500.00</div>
+                <div class="rate-unit">Par semaine</div>
+                <div class="rate-details">7 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-season">PRE-WINTER</div>
+                <div class="rate-name">7 Nov, 2026 - 18 Dec, 2026</div>
+                <div class="rate-price">€3,000.00</div>
+                <div class="rate-unit">Par semaine</div>
+                <div class="rate-details">7 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
+            </div>
+            <div class="rate-card featured">
+                <div class="rate-season">HOLIDAYS</div>
+                <div class="rate-name">19 Dec, 2026 - 1 Jan, 2027</div>
+                <div class="rate-price">€7,500.00</div>
+                <div class="rate-unit">Par semaine</div>
+                <div class="rate-details">7 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-season">MID SEASON</div>
+                <div class="rate-name">2 Jan, 2027 - 5 Feb, 2027</div>
+                <div class="rate-price">€4,000.00</div>
+                <div class="rate-unit">Par semaine</div>
+                <div class="rate-details">7 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-season">HIGH SEASON</div>
+                <div class="rate-name">6 Feb, 2027 - 5 Mar, 2027</div>
+                <div class="rate-price">€4,600.00</div>
+                <div class="rate-unit">Par semaine</div>
+                <div class="rate-details">7 nights min<br>Jusqu'à 12 personnes<br>Charges incluses</div>
             </div>
         </div>
         <p class="deposit-note">Frais de ménage : <strong>350 €</strong> / séjour · Caution réservation directe :
@@ -2056,16 +2095,34 @@
         // ── PRICING ──────────────────────────────────────────────────────
         const CLEANING_FEE = 350; // € — frais de ménage fixes par séjour
 
-        const RATES = {
-            low: { label: 'Basse saison', weekly: 2800 },
-            high: { label: 'Haute saison', weekly: 3800 },
-            xmas: { label: 'Noël / Nouvel An', weekly: 4500 }
-        };
+        // Season-specific ranges (start/end inclusive) with weekly rates
+        const SEASONS = [
+            { name: 'March', start: '2026-03-07', end: '2026-04-03', weekly: 3800 },
+            { name: 'APRIL', start: '2026-04-04', end: '2026-05-08', weekly: 4200 },
+            { name: 'SPRING', start: '2026-05-09', end: '2026-06-29', weekly: 2800 },
+            { name: 'AUTUMN', start: '2026-08-30', end: '2026-10-16', weekly: 2800 },
+            { name: 'TOUSSAINT', start: '2026-10-17', end: '2026-11-06', weekly: 3500 },
+            { name: 'PRE-WINTER', start: '2026-11-07', end: '2026-12-18', weekly: 3000 },
+            { name: 'HOLIDAYS', start: '2026-12-19', end: '2027-01-01', weekly: 7500 },
+            { name: 'MID SEASON', start: '2027-01-02', end: '2027-02-05', weekly: 4000 },
+            { name: 'HIGH SEASON', start: '2027-02-06', end: '2027-03-05', weekly: 4600 }
+        ];
+
         function getRate(d) {
-            const m = d.getMonth(), day = d.getDate();
-            if ((m === 11 && day >= 20) || (m === 0 && day <= 5)) return RATES.xmas;
-            if ([0, 1, 2, 3, 11].includes(m)) return RATES.high;
-            return RATES.low;
+            // Helper: parse 'YYYY-MM-DD' as local midnight Date
+            const parse = s => {
+                const [y, m, day] = s.split('-').map(Number);
+                return new Date(y, m - 1, day);
+            };
+
+            for (const s of SEASONS) {
+                const a = parse(s.start);
+                const b = parse(s.end);
+                const bEx = new Date(b.getFullYear(), b.getMonth(), b.getDate() + 1);
+                if (d >= a && d < bEx) return { label: s.name, weekly: s.weekly };
+            }
+            // Fallback to a sensible default
+            return { label: 'Default', weekly: 2800 };
         }
         function calcPrice(ci, co) {
             const nights = Math.round((co - ci) / 86400000);
