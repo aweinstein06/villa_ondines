@@ -1809,8 +1809,7 @@
             </div>
         </div>
         <p class="deposit-note">Frais de ménage : <strong>350 €</strong> / séjour · Caution réservation directe :
-            <strong>3 000 €</strong> (chèque/CB) · Caution Booking.com : <strong>500 €</strong> (CB, remboursée sous
-            24–48h) · Taxe de séjour non incluse
+            <strong>3 000 €</strong> (chèque/CB) · Taxe de séjour non incluse
         </p>
     </section>
 
@@ -1819,13 +1818,10 @@
         <div class="booking-inner">
             <div class="section-label">Disponibilités & Réservation</div>
             <h2 class="section-title">Vérifiez les dates <em style="color:var(--light)">disponibles</em></h2>
-            <p class="section-body">Les dates en rouge sont déjà réservées, synchronisées en temps réel. Sélectionnez
+            <p class="section-body">Les dates en rouge sont déjà réservées. Sélectionnez
                 votre arrivée puis votre départ pour obtenir une estimation de prix instantanée.</p>
 
-            <div class="ical-bar">
-                <div id="ical-dot"></div>
-                <div id="ical-status">Chargement des disponibilités…</div>
-            </div>
+            <!-- iCal status removed -->
 
             <div class="cal-wrap">
                 <div class="cal-nav">
@@ -2188,7 +2184,7 @@
         }
 
         async function loadICal() {
-            setDot('loading', 'Synchronisation du calendrier…');
+            setDot('loading');
             // Apply manual blocks right away so calendar is usable immediately
             applyAllBlocks([]);
 
@@ -2212,7 +2208,7 @@
                     const parts = [];
                     if (ni > 0) parts.push(ni + ' réservation' + (ni > 1 ? 's' : '') + ' Avantio');
                     if (nm > 0) parts.push(nm + ' bloc' + (nm > 1 ? 's' : '') + ' manuel' + (nm > 1 ? 's' : ''));
-                    setDot('ok', '✓ Calendrier synchronisé' + (parts.length ? ' — ' + parts.join(' + ') : ''));
+                    setDot('ok');
                     return;
                 } catch (err) {
                     // try next proxy
@@ -2453,7 +2449,7 @@
                 `Bonjour,\n\nJe souhaite réserver la Villa les Ondines :\n\n` +
                 `Arrivée    : ${fmt(selStart)}\nDépart     : ${fmt(selEnd)}\n` +
                 `Durée      : ${price.nights} nuit(s)\nVoyageurs  : ${f('guests')}\n` +
-                `Location   : ~${price.rental.toLocaleString('fr-FR')} €\n` +
+                `Location   : ${price.rental.toLocaleString('fr-FR')} €\n` +
                 `Ménage     : ${price.cleaning.toLocaleString('fr-FR')} €\n` +
                 `TOTAL      : ${price.total.toLocaleString('fr-FR')} €\n\n` +
                 `Nom   : ${f('fname')} ${f('lname')}\nEmail : ${f('email')}\n` +
@@ -2509,11 +2505,11 @@
                 season3: 'Noël & Nouvel An', season3_name: '20 déc. – 5 jan.', season3_unit: 'Par semaine',
                 season3_details: 'Minimum 14 nuits<br>Jusqu\'à 12 personnes<br>Charges incluses',
                 season3_months: '20 décembre → 5 janvier',
-                deposit: 'Frais de ménage : <strong>350 €</strong> / séjour · Caution réservation directe : <strong>3 000 €</strong> (chèque/CB) · Caution Booking.com : <strong>500 €</strong> (CB, remboursée sous 24–48h) · Taxe de séjour non incluse',
+                deposit: 'Frais de ménage : <strong>350 €</strong> / séjour · Caution réservation directe : <strong>3 000 €</strong> (chèque/CB) · Taxe de séjour non incluse',
                 // Booking
                 book_label: 'Disponibilités & Réservation',
                 book_title: 'Vérifiez les dates <em style="color:var(--light)">disponibles</em>',
-                book_body: 'Les dates en rouge sont déjà réservées, synchronisées en temps réel. Sélectionnez votre arrivée puis votre départ pour obtenir le prix.',
+                book_body: 'Les dates en rouge sont déjà réservées. Sélectionnez votre arrivée puis votre départ pour obtenir le prix.',
                 cal_sel: 'Sélectionné', cal_unavail: 'Indisponible', cal_avail: 'Disponible',
                 unavail_banner: '⛔ Ces dates ne sont pas disponibles — elles contiennent une période déjà réservée. Veuillez choisir d\'autres dates.',
                 stay_label: 'Votre séjour', price_label: 'Prix total',
@@ -2583,7 +2579,7 @@
                 season3: 'Christmas & New Year', season3_name: 'Dec 20 – Jan 5', season3_unit: 'Per week',
                 season3_details: 'Minimum 14 nights<br>Up to 12 guests<br>All charges included',
                 season3_months: 'December 20 → January 5',
-                deposit: 'Cleaning fee: <strong>€350</strong> per stay · Direct booking deposit: <strong>€3,000</strong> (cheque/CC) · Booking.com deposit: <strong>€500</strong> (CC, refunded within 24–48h) · Tourist tax not included',
+                deposit: 'Cleaning fee: <strong>€350</strong> per stay · Direct booking deposit: <strong>€3,000</strong> (cheque/CC) · Tourist tax not included',
                 book_label: 'Availability & Booking',
                 book_title: 'Check <em style="color:var(--light)">available</em> dates',
                 book_body: 'Dates in red are already reserved, synced in real time. Select your arrival then departure to see the exact price.',
