@@ -858,6 +858,85 @@
             letter-spacing: 0.04em;
         }
 
+        /* Lightbox styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+        }
+
+        .lightbox.open {
+            display: flex;
+        }
+
+        .lightbox-inner {
+            position: relative;
+            max-width: 94vw;
+            max-height: 94vh;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .lightbox-close,
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .lightbox-close {
+            right: 12px;
+            top: 12px;
+            transform: none;
+            border-radius: 6px;
+        }
+
+        .lightbox-nav {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .lightbox-prev {
+            left: 12px;
+        }
+
+        .lightbox-next {
+            right: 12px;
+        }
+
+        .lightbox-counter {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 12px;
+            color: #fff;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .gallery-grid .gallery-item img {
+            cursor: zoom-in;
+        }
+
         .cal-wrap {
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1568,6 +1647,17 @@
         </div>
     </section>
 
+    <!-- Lightbox modal for gallery -->
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+        <div class="lightbox-inner">
+            <button class="lightbox-close" aria-label="Close">✕</button>
+            <button class="lightbox-nav lightbox-prev" aria-label="Previous">‹</button>
+            <img class="lightbox-img" src="" alt="" loading="lazy">
+            <button class="lightbox-nav lightbox-next" aria-label="Next">›</button>
+            <div class="lightbox-counter"></div>
+        </div>
+    </div>
+
     <!-- SPECS -->
     <div class="specs-strip">
         <div class="spec-item">
@@ -1997,7 +2087,7 @@
         <div class="attractions-grid">
             <div class="att-card">
                 <div class="att-visual">
-                    <img src="figures/" alt="Village des Anses d'Arlet" loading="lazy"
+                    <img src="figures/img1.jpg" alt="Village des Anses d'Arlet" loading="lazy"
                         onerror="this.parentElement.innerHTML='<div style=background:linear-gradient(135deg,#0a2a50,#1a7090);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;opacity:0.3>🏖️</div>'">
                 </div>
                 <div class="att-info">
@@ -2226,11 +2316,21 @@
             const dot = document.getElementById('ical-dot');
             const txt = document.getElementById('ical-status');
             const base = 'width:9px;height:9px;border-radius:50%;flex-shrink:0;';
-            if (state === 'ok') { dot.style.cssText = base + 'background:#4dd296;animation:pulse-green 2s ease infinite;'; txt.style.color = 'rgba(255,255,255,0.65)'; }
-            else if (state === 'warn') { dot.style.cssText = base + 'background:#f0a840;'; txt.style.color = 'rgba(255,200,100,0.9)'; }
-            else if (state === 'error') { dot.style.cssText = base + 'background:#f87;'; txt.style.color = 'rgba(255,130,130,0.9)'; }
-            else { dot.style.cssText = base + 'background:#888;animation:pulse-grey 1.5s ease infinite;'; txt.style.color = 'rgba(255,255,255,0.4)'; }
-            if (msg) document.getElementById('ical-status').textContent = msg;
+            try {
+                if (dot) {
+                    if (state === 'ok') dot.style.cssText = base + 'background:#4dd296;animation:pulse-green 2s ease infinite;';
+                    else if (state === 'warn') dot.style.cssText = base + 'background:#f0a840;';
+                    else if (state === 'error') dot.style.cssText = base + 'background:#f87;';
+                    else dot.style.cssText = base + 'background:#888;animation:pulse-grey 1.5s ease infinite;';
+                }
+                if (txt) {
+                    if (state === 'ok') txt.style.color = 'rgba(255,255,255,0.65)';
+                    else if (state === 'warn') txt.style.color = 'rgba(255,200,100,0.9)';
+                    else if (state === 'error') txt.style.color = 'rgba(255,130,130,0.9)';
+                    else txt.style.color = 'rgba(255,255,255,0.4)';
+                    if (msg) txt.textContent = msg;
+                }
+            } catch (e) { /* silently ignore if elements missing */ }
         }
 
         async function loadICal() {
@@ -2489,7 +2589,8 @@
         function submitForm() {
             const f = id => document.getElementById(id).value.trim();
             if (!f('fname') || !f('email') || !f('guests') || !selStart || !selEnd) {
-                document.getElementById('ical-status').textContent = '⚠ Veuillez remplir tous les champs et sélectionner vos dates.';
+                const icalStatus = document.getElementById('ical-status');
+                if (icalStatus) icalStatus.textContent = '⚠ Veuillez remplir tous les champs et sélectionner vos dates.';
                 setDot('error'); return;
             }
             const price = calcPrice(selStart, selEnd);
@@ -2507,6 +2608,85 @@
             );
             window.location.href = `mailto:info@villaondines.com?subject=${sub}&body=${body}`;
         }
+
+        // ── GALLERY LIGHTBOX ───────────────────────────────────────────
+        (function () {
+            const lb = document.getElementById('lightbox');
+            const gallery = document.querySelector('.gallery-grid');
+            console.log('Lightbox IIFE start', { lb, gallery });
+            if (!lb) return;
+            const lbImg = lb.querySelector('.lightbox-img');
+            const lbClose = lb.querySelector('.lightbox-close');
+            const lbPrev = lb.querySelector('.lightbox-prev');
+            const lbNext = lb.querySelector('.lightbox-next');
+            const lbCounter = lb.querySelector('.lightbox-counter');
+            let imgs = [];
+            let idx = 0;
+
+            function refreshImgs() { imgs = Array.from(document.querySelectorAll('.gallery-grid .gallery-item img')); console.log('refreshImgs ->', imgs.length); }
+            function openAt(i) {
+                if (!imgs.length) { refreshImgs(); if (!imgs.length) { console.log('no imgs to open'); return; } }
+                idx = (i + imgs.length) % imgs.length;
+                console.log('openAt', idx, imgs[idx] && imgs[idx].src);
+                lbImg.src = imgs[idx].src;
+                lbImg.alt = imgs[idx].alt || '';
+                lb.classList.add('open');
+                lb.setAttribute('aria-hidden', 'false');
+                updateCounter();
+            }
+            function close() { console.log('lightbox close'); lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); }
+            function prev() { openAt(idx - 1); }
+            function next() { openAt(idx + 1); }
+            function updateCounter() { if (lbCounter) lbCounter.textContent = `${idx + 1} / ${imgs.length}`; }
+
+            // Delegate clicks from gallery container
+            if (gallery) {
+                gallery.addEventListener('click', function (e) {
+                    // Accept clicks on the img or anywhere inside its .gallery-item
+                    const item = e.target.closest ? e.target.closest('.gallery-item') : null;
+                    if (!item || !gallery.contains(item)) return;
+                    let img = item.querySelector('img');
+                    console.log('gallery click', { target: e.target, item, img });
+
+                    // If no <img> element, try to read a CSS background-image on the item
+                    if (!img) {
+                        const bg = window.getComputedStyle(item).backgroundImage;
+                        if (bg && bg !== 'none') {
+                            const url = bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+                            console.log('found background image URL', url);
+                            // open lightbox with this url (not part of imgs array)
+                            e.preventDefault();
+                            if (lbImg) {
+                                lbImg.src = url;
+                                lbImg.alt = item.getAttribute('data-alt') || '';
+                                lb.classList.add('open');
+                                lb.setAttribute('aria-hidden', 'false');
+                                lbCounter.textContent = '';
+                            }
+                            return;
+                        }
+                        // nothing to open
+                        return;
+                    }
+
+                    refreshImgs();
+                    const i = imgs.indexOf(img);
+                    console.log('clicked image index', i);
+                    if (i >= 0) { e.preventDefault(); openAt(i); }
+                });
+            }
+
+            if (lbClose) lbClose.addEventListener('click', close);
+            if (lbPrev) lbPrev.addEventListener('click', prev);
+            if (lbNext) lbNext.addEventListener('click', next);
+            lb.addEventListener('click', e => { if (e.target === lb) close(); });
+            document.addEventListener('keydown', e => {
+                if (!lb.classList.contains('open')) return;
+                if (e.key === 'Escape') close();
+                else if (e.key === 'ArrowLeft') prev();
+                else if (e.key === 'ArrowRight') next();
+            });
+        })();
 
         // ── LANGUAGE TOGGLE ──────────────────────────────────────────────
         let lang = 'fr';
