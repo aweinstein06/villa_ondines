@@ -973,3 +973,4 @@ applyLang();
 buildCalendars();
 loadICal();
 window.addEventListener('resize', buildCalendars);
+
