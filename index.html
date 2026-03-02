@@ -1419,9 +1419,12 @@
             }
 
             .hero-stats {
-                right: 1.5rem;
-                bottom: 5rem;
+                position: static;
+                right: auto;
+                bottom: auto;
                 gap: 1.5rem;
+                margin: 1.2rem auto 0;
+                justify-content: center;
             }
 
             .stat-num {
@@ -1840,6 +1843,10 @@
                         micro-ondes, lave-vaisselle</small></div>
             </div>
             <div class="amenity-item">
+                <div class="amenity-emoji">🛏️</div>
+                <div class="amenity-name">4 chambres avec lit double et 1 chambre dortoir pour enfants.</div>
+            </div>
+            <div class="amenity-item">
                 <div class="amenity-emoji">📡</div>
                 <div class="amenity-name">TV satellite<br><small style="font-size:0.6rem;opacity:0.5">Chaînes FR &amp;
                         EN</small></div>
@@ -1865,6 +1872,7 @@
                 <div class="amenity-emoji">🌿</div>
                 <div class="amenity-name">150m² de terrasses</div>
             </div>
+
         </div>
         <div class="rules-strip">
             <div class="rule">🚬 Non-fumeur</div>
@@ -1872,7 +1880,7 @@
             <div class="rule">👫 Groupes –22 ans non acceptés</div>
             <div class="rule">👶 Enfants bienvenus · Berceau disponible</div>
         </div>
-    </section>
+    </section>>
 
     <!-- RATES -->
     <section class="rates" id="rates">
@@ -2736,6 +2744,9 @@
                 season3_details: 'Minimum 14 nuits<br>Jusqu\'à 12 personnes<br>Charges incluses',
                 season3_months: '20 décembre → 5 janvier',
                 deposit: 'Frais de ménage : <strong>350 €</strong> / séjour · Caution réservation directe : <strong>3 000 €</strong> (chèque/CB) · Taxe de séjour non incluse',
+                rooms_label: 'Chambres',
+                rooms_title: '4 chambres & une chambre dortoir',
+                rooms_body: "<p>4 chambres avec lit double - 160x200 (3x), 180x200 (1x) - et salle d\'eau en suite.</p><p>1 chambre dortoir pour enfants.</p>",
                 // Booking
                 book_label: 'Disponibilités & Réservation',
                 book_title: 'Vérifiez les dates <em style="color:var(--light)">disponibles</em>',
@@ -2810,6 +2821,9 @@
                 season3_details: 'Minimum 14 nights<br>Up to 12 guests<br>All charges included',
                 season3_months: 'December 20 → January 5',
                 deposit: 'Cleaning fee: <strong>€350</strong> per stay · Direct booking deposit: <strong>€3,000</strong> (cheque/CC) · Tourist tax not included',
+                rooms_label: 'Bedrooms',
+                rooms_title: '4 double bedrooms & a dormitory',
+                rooms_body: "<p>4 double bedrooms with beds - 160x200 (3x), 180x200 (1x) - each with an en-suite shower room.</p><p>1 dormitory room suitable for children.</p>",
                 book_label: 'Availability & Booking',
                 book_title: 'Check <em style="color:var(--light)">available</em> dates',
                 book_body: 'Dates in red are already reserved, synced in real time. Select your arrival then departure to see the exact price.',
