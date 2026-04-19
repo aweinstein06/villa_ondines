@@ -1,3 +1,4 @@
+
 // SMOOTH SCROLL
 document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
@@ -154,6 +155,7 @@ async function loadICal() {
             if (!ics || !ics.includes('BEGIN:VCALENDAR')) throw new Error('Not a valid iCal');
 
             const icalRanges = parseICS(ics);
+
             applyAllBlocks(icalRanges);
 
             const ni = icalRanges.length, nm = MANUAL_BLOCKS.length;
@@ -200,6 +202,24 @@ function isBlockedForStay(d) {
 function isBlockedForDeparture(d) {
     return false; // departure on another family's arrival day is allowed
 }
+
+function isOccupiedNight(d) {
+    const t = midnight(d).getTime();
+    return blockedRanges.some(r => {
+        const start = midnight(r.s).getTime();
+        const end = midnight(r.e).getTime();
+        return t >= start && t < end;
+    });
+}
+
+function canArrive(d) {
+    return !isOccupiedNight(d);
+}
+
+function canDepart(d) {
+    return true;
+}
+
 function isPast(d) { return midnight(d).getTime() < midnight(new Date()).getTime(); }
 
 let viewYear = new Date().getFullYear();
@@ -275,7 +295,8 @@ function makeMonth(y, m) {
     for (let dn = 1; dn <= dim; dn++) {
         const date = new Date(y, m, dn);
         const past = isPast(date);
-        const bl = isBlockedForArrival(date);;
+        const selectingDeparture = !!selStart && !selEnd;
+        const bl = selectingDeparture ? false : !canArrive(date);
         const ss = sameDay(date, selStart);
         const se = sameDay(date, selEnd);
         const tod = sameDay(date, new Date());
@@ -311,7 +332,6 @@ function makeMonth(y, m) {
         ].join(';') + ';';
 
         if (!past && !bl) {
-            // Capture date value in closure cleanly
             (function (capturedDate) {
                 cell.addEventListener('click', function () {
                     onDateClick(capturedDate);
@@ -324,7 +344,6 @@ function makeMonth(y, m) {
     wrap.appendChild(grid);
     return wrap;
 }
-
 
 function onDateClick(date) {
     document.getElementById('unavail-banner').style.display = 'none';
@@ -390,7 +409,7 @@ function updateSummary() {
     document.getElementById('price-total').textContent = `${price.total.toLocaleString('fr-FR')} €`;
     const rateLabel = lang === 'fr' ? Object.entries(price.bk).map(([l, { n, pn }]) => `${l} (${n}n × ${Math.round(pn)}€/n)`).join(' + ')
         : Object.entries(price.bk).map(([l, { n, pn }]) => {
-            const en = { 'Basse saison': 'Low season', 'Haute saison': 'High season', 'Noël / Nouvel An': 'Christmas / New Year' };
+            const en = { 'Mars': 'March', 'Avril': 'April', 'Printemps': 'Spring', 'Été': 'Summer', 'Automne': 'Autumn', 'Toussaint': 'All Saints', 'Pré-Hiver': 'Pre-Winter', 'Vacances': 'Holidays', 'Mi-Saison': 'Mid-Season', 'Haute Saison': 'High Season' };
             return `${en[l] || l} (${n}n × ${Math.round(pn)}€/n)`;
         }).join(' + ');
     document.getElementById('price-breakdown').textContent = rateLabel
@@ -541,7 +560,7 @@ const T = {
         am_body: "Chaque chambre dispose de sa propre salle de bain avec douche italienne et sèche-cheveux. La villa est entièrement climatisée et insonorisée.",
         rule1: '🚬 Non-fumeur', rule2: '🐾 Animaux non admis',
         rule3: '👫 Groupes –22 ans non acceptés', rule4: '👶 Enfants bienvenus · Berceau disponible',
-        amenity_1: 'Piscine à débordement<br><small style="font-size:0.6rem;opacity:0.5">5.5×3.5m · prof. 0.8–1.6m</small>',
+        amenity_1: 'Piscine à débordement<br><small style="font-size:0.6rem;opacity:0.5">5.5 × 3.5m · prof. 0.8–1.6m</small>',
         amenity_2: 'Baignoire extérieure',
         amenity_3: 'Vue mer panoramique',
         amenity_4: 'Climatisation<br><small style="font-size:0.6rem;opacity:0.5">Toutes les pièces</small>',
@@ -566,15 +585,26 @@ const T = {
         // Rates
         rates_label: 'Tarification', rates_title: 'Tarifs <em>par saison</em>',
         rates_body: "Tarifs à la semaine pour l'ensemble de la villa — jusqu'à 12 personnes. Caution de 3 000 € / séjour, payable sur place.",
-        season1: 'Basse saison', season1_name: 'Mai – Novembre', season1_unit: 'Par semaine',
-        season1_details: "Minimum 7 nuits<br>Jusqu'à 12 personnes · Charges incluses",
-        season1_months: 'mai · juin · juillet · août · septembre · octobre · novembre',
-        season2: 'Haute saison', season2_name: 'Décembre – Avril', season2_unit: 'Par semaine',
-        season2_details: "Minimum 7 nuits<br>Jusqu'à 12 personnes · Charges incluses",
-        season2_months: 'décembre · janvier · février · mars · avril',
-        season3: 'Noël & Nouvel An', season3_name: '20 déc. – 5 jan.', season3_unit: 'Par semaine',
-        season3_details: "Minimum 14 nuits<br>Jusqu'à 12 personnes · Charges incluses",
-        season3_months: '20 décembre → 5 janvier',
+        season1: 'MARS', season1_name: '7 Mar, 2026 - 3 Apr, 2026', season1_unit: 'Par semaine',
+        season1_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season2: 'AVRIL', season2_name: '4 Apr, 2026 - 8 May, 2026', season2_unit: 'Par semaine',
+        season2_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season3: 'PRINTEMPS', season3_name: '9 May, 2026 - 29 Jun, 2026', season3_unit: 'Par semaine',
+        season3_details: "5 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season4: 'ÉTÉ', season4_name: '29 Jun, 2026 - 28 Aug, 2026', season4_unit: 'Par semaine',
+        season4_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season5: 'AUTOMNE', season5_name: '30 Aug, 2026 - 16 Oct, 2026', season5_unit: 'Par semaine',
+        season5_details: "5 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season6: 'TOUSSAINT', season6_name: '17 Oct, 2026 - 6 Nov, 2026', season6_unit: 'Par semaine',
+        season6_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season7: 'PRÉ-HIVER', season7_name: '7 Nov, 2026 - 18 Dec, 2026', season7_unit: 'Par semaine',
+        season7_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season8: 'VACANCES', season8_name: '19 Dec, 2026 - 1 Jan, 2027', season8_unit: 'Par semaine',
+        season8_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season9: 'MI-SAISON', season9_name: '2 Jan, 2027 - 5 Feb, 2027', season9_unit: 'Par semaine',
+        season9_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
+        season10: 'HAUTE SAISON', season10_name: '6 Feb, 2027 - 5 Mar, 2027', season10_unit: 'Par semaine',
+        season10_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
         deposit: 'Frais de ménage : <strong>350 €</strong> / séjour · Caution réservation directe : <strong>3 000 €</strong> (chèque/CB) · Taxe de séjour non incluse',
         rooms_label: 'Chambres',
         rooms_title: '4 chambres & une chambre dortoir',
@@ -663,7 +693,7 @@ const T = {
         am_body: "Each bedroom has its own en-suite bathroom with walk-in shower and hairdryer. The villa is fully air-conditioned and soundproofed throughout.",
         rule1: '🚬 Non-smoking', rule2: '🐾 No pets',
         rule3: '👫 Groups under 22 not accepted', rule4: '👶 Children welcome · Cot available',
-        amenity_1: 'Infinity pool<br><small style="font-size:0.6rem;opacity:0.5">5.5×3.5m · depth 0.8–1.6m</small>',
+        amenity_1: 'Infinity pool<br><small style="font-size:0.6rem;opacity:0.5">5.5 × 3.5m · depth 0.8–1.6m</small>',
         amenity_2: 'Outdoor bathtub',
         amenity_3: 'Panoramic sea view',
         amenity_4: 'Air conditioning<br><small style="font-size:0.6rem;opacity:0.5">All rooms</small>',
@@ -687,15 +717,26 @@ const T = {
         amenity_22: '150m² of terraces',
         rates_label: 'Pricing', rates_title: 'Rates <em>by season</em>',
         rates_body: "Weekly rates for the entire villa — up to 12 guests. Security deposit of €3,000 per stay, payable on arrival.",
-        season1: 'Low season', season1_name: 'May – November', season1_unit: 'Per week',
-        season1_details: 'Minimum 7 nights<br>Up to 12 guests<br>All charges included',
-        season1_months: 'May · June · July · August · September · October · November',
-        season2: 'High season', season2_name: 'December – April', season2_unit: 'Per week',
-        season2_details: 'Minimum 7 nights<br>Up to 12 guests<br>All charges included',
-        season2_months: 'December · January · February · March · April',
-        season3: 'Christmas & New Year', season3_name: 'Dec 20 – Jan 5', season3_unit: 'Per week',
-        season3_details: 'Minimum 14 nights<br>Up to 12 guests<br>All charges included',
-        season3_months: 'December 20 → January 5',
+        season1: 'MARCH', season1_name: '7 Mar, 2026 - 3 Apr, 2026', season1_unit: 'Per week',
+        season1_details: '7 nights min<br>Up to 12 guests<br>All charges included',
+        season2: 'APRIL', season2_name: '4 Apr, 2026 - 8 May, 2026', season2_unit: 'Per week',
+        season2_details: '7 nights min<br>Up to 12 guests<br>All charges included',
+        season3: 'SPRING', season3_name: '9 May, 2026 - 29 Jun, 2026', season3_unit: 'Per week',
+        season3_details: '5 nights min<br>Up to 12 guests<br>All charges included',
+        season4: 'SUMMER', season4_name: '29 Jun, 2026 - 28 Aug, 2026', season4_unit: 'Per week',
+        season4_details: '7 nights min<br>Up to 12 guests<br>All charges included',
+        season5: 'AUTUMN', season5_name: '30 Aug, 2026 - 16 Oct, 2026', season5_unit: 'Per week',
+        season5_details: '5 nights min<br>Up to 12 guests<br>All charges included',
+        season6: 'FALL BREAK', season6_name: '17 Oct, 2026 - 6 Nov, 2026', season6_unit: 'Per week',
+        season6_details: '7 nights min<br>Up to 12 guests<br>All charges included',
+        season7: 'PRE-WINTER', season7_name: '7 Nov, 2026 - 18 Dec, 2026', season7_unit: 'Per week',
+        season7_details: '7 nights min<br>Up to 12 guests<br>All charges included',
+        season8: 'HOLIDAYS', season8_name: '19 Dec, 2026 - 1 Jan, 2027', season8_unit: 'Per week',
+        season8_details: '7 nights min<br>Up to 12 guests<br>All charges included',
+        season9: 'MID SEASON', season9_name: '2 Jan, 2027 - 5 Feb, 2027', season9_unit: 'Per week',
+        season9_details: '7 nights min<br>Up to 12 guests<br>All charges included',
+        season10: 'HIGH SEASON', season10_name: '6 Feb, 2027 - 5 Mar, 2027', season10_unit: 'Per week',
+        season10_details: '7 nights min<br>Up to 12 guests<br>All charges included',
         deposit: 'Cleaning fee: <strong>€350</strong> per stay · Direct booking deposit: <strong>€3,000</strong> (cheque/CC) · Tourist tax not included',
         rooms_label: 'Bedrooms',
         rooms_title: '4 double beds & a dormitory',
@@ -990,4 +1031,5 @@ applyLang();
 buildCalendars();
 loadICal();
 window.addEventListener('resize', buildCalendars);
+
 
