@@ -179,9 +179,26 @@ async function loadICal() {
 // ── CALENDAR ─────────────────────────────────────────────────────
 function midnight(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 function sameDay(a, b) { return a && b && midnight(a).getTime() === midnight(b).getTime(); }
-function isBlocked(d) {
+function isBlockedForArrival(d) {
     const t = midnight(d).getTime();
-    return blockedRanges.some(r => t >= midnight(r.s).getTime() && t < midnight(r.e).getTime());
+    return blockedRanges.some(r => {
+        const start = midnight(r.s).getTime();
+        const end = midnight(r.e).getTime();
+        return t >= start && t < end;   // arrival day blocked only if inside occupied nights
+    });
+}
+
+function isBlockedForStay(d) {
+    const t = midnight(d).getTime();
+    return blockedRanges.some(r => {
+        const start = midnight(r.s).getTime();
+        const end = midnight(r.e).getTime();
+        return t >= start && t < end;
+    });
+}
+
+function isBlockedForDeparture(d) {
+    return false; // departure on another family's arrival day is allowed
 }
 function isPast(d) { return midnight(d).getTime() < midnight(new Date()).getTime(); }
 
@@ -258,7 +275,7 @@ function makeMonth(y, m) {
     for (let dn = 1; dn <= dim; dn++) {
         const date = new Date(y, m, dn);
         const past = isPast(date);
-        const bl = isBlocked(date);
+        const bl = isBlockedForArrival(date);;
         const ss = sameDay(date, selStart);
         const se = sameDay(date, selEnd);
         const tod = sameDay(date, new Date());
@@ -308,30 +325,29 @@ function makeMonth(y, m) {
     return wrap;
 }
 
+
 function onDateClick(date) {
     document.getElementById('unavail-banner').style.display = 'none';
 
     if (!selStart || selEnd) {
-        // Start fresh selection
+        if (isBlockedForArrival(date) || isPast(date)) return;
         selStart = midnight(date);
         selEnd = null;
         buildCalendars();
         return;
     }
 
-    // Already have start, picking end
     if (midnight(date).getTime() <= midnight(selStart).getTime()) {
-        // Clicked on or before start — restart
+        if (isBlockedForArrival(date) || isPast(date)) return;
         selStart = midnight(date);
         selEnd = null;
         buildCalendars();
         return;
     }
 
-    // Check for blocked dates within the selected range
     let check = new Date(selStart.getFullYear(), selStart.getMonth(), selStart.getDate() + 1);
     while (midnight(check).getTime() < midnight(date).getTime()) {
-        if (isBlocked(check)) {
+        if (isBlockedForStay(check)) {
             document.getElementById('unavail-banner').style.display = 'block';
             selStart = null;
             selEnd = null;

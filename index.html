@@ -1511,6 +1511,33 @@
             color: rgba(255, 255, 255, 0.18);
         }
 
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .footer-social a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(77, 184, 200, 0.15);
+            border: 1px solid rgba(77, 184, 200, 0.3);
+            color: var(--accent);
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .footer-social a:hover {
+            background: var(--accent);
+            color: var(--deep);
+            border-color: var(--accent);
+        }
+
         @media(max-width:900px) {
             nav {
                 padding: 1rem 1.5rem;
@@ -1694,6 +1721,14 @@
             <li><a href="#booking" class="nav-cta" data-i18n="nav_book">Réserver</a></li>
         </ul>
         <div style="display:flex;align-items:center;gap:0.8rem;">
+            <a href="https://instagram.com/villaondines" target="_blank" rel="noopener noreferrer" title="Instagram"
+                style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(77,184,200,0.1);border:1px solid rgba(77,184,200,0.2);color:rgba(77,184,200,0.8);text-decoration:none;font-size:0.85rem;transition:all 0.2s;cursor:pointer;"
+                onmouseover="this.style.background='var(--accent)';this.style.color='var(--deep)';this.style.borderColor='var(--accent)';"
+                onmouseout="this.style.background='rgba(77,184,200,0.1)';this.style.color='rgba(77,184,200,0.8)';this.style.borderColor='rgba(77,184,200,0.2)';">📷</a>
+            <a href="https://facebook.com/villaondines" target="_blank" rel="noopener noreferrer" title="Facebook"
+                style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(77,184,200,0.1);border:1px solid rgba(77,184,200,0.2);color:rgba(77,184,200,0.8);text-decoration:none;font-size:0.85rem;transition:all 0.2s;cursor:pointer;"
+                onmouseover="this.style.background='var(--accent)';this.style.color='var(--deep)';this.style.borderColor='var(--accent)';"
+                onmouseout="this.style.background='rgba(77,184,200,0.1)';this.style.color='rgba(77,184,200,0.8)';this.style.borderColor='rgba(77,184,200,0.2)';">f</a>
             <button id="lang-toggle"
                 style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.75);padding:0.38rem 0.85rem;font-family:'Jost',sans-serif;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">EN</button>
             <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
@@ -1785,7 +1820,7 @@
                 </div>
                 <div class="feature"><span style="font-size:1.2rem">🏊</span>
                     <div>
-                        <div class="feature-num">5.5×3.5m</div>
+                        <div class="feature-num">5.5 × 3.5m</div>
                         <div class="feature-label">Piscine à débordement</div>
                     </div>
                 </div>
@@ -1946,7 +1981,7 @@
             <div class="amenity-item">
                 <div class="amenity-emoji">🏊</div>
                 <div class="amenity-name" data-i18n="amenity_1">Piscine à débordement<br><small
-                        style="font-size:0.6rem;opacity:0.5">5.5×3.5m
+                        style="font-size:0.6rem;opacity:0.5">5.5 × 3.5m
                         · prof. 0.8–1.6m</small></div>
             </div>
             <div class="amenity-item">
@@ -2390,6 +2425,12 @@
             <li><a href="#booking">Réserver</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
+        <div class="footer-social">
+            <a href="https://instagram.com/villaondines" target="_blank" rel="noopener noreferrer"
+                title="Instagram @villaondines">📷</a>
+            <a href="https://facebook.com/villaondines" target="_blank" rel="noopener noreferrer"
+                title="Facebook @villaondines">f</a>
+        </div>
         <div class="footer-copy">© 2026 Villa les Ondines · Les Anses-d'Arlet · Martinique</div>
     </footer>
 </body>
@@ -2922,7 +2963,7 @@
             am_body: "Chaque chambre dispose de sa propre salle de bain avec douche italienne et sèche-cheveux. La villa est entièrement climatisée et insonorisée.",
             rule1: '🚬 Non-fumeur', rule2: '🐾 Animaux non admis',
             rule3: '👫 Groupes –22 ans non acceptés', rule4: '👶 Enfants bienvenus · Berceau disponible',
-            amenity_1: 'Piscine à débordement<br><small style="font-size:0.6rem;opacity:0.5">5.5×3.5m · prof. 0.8–1.6m</small>',
+            amenity_1: 'Piscine à débordement<br><small style="font-size:0.6rem;opacity:0.5">5.5 × 3.5m · prof. 0.8–1.6m</small>',
             amenity_2: 'Baignoire extérieure',
             amenity_3: 'Vue mer panoramique',
             amenity_4: 'Climatisation<br><small style="font-size:0.6rem;opacity:0.5">Toutes les pièces</small>',
@@ -3055,7 +3096,7 @@
             am_body: "Each bedroom has its own en-suite bathroom with walk-in shower and hairdryer. The villa is fully air-conditioned and soundproofed throughout.",
             rule1: '🚬 Non-smoking', rule2: '🐾 No pets',
             rule3: '👫 Groups under 22 not accepted', rule4: '👶 Children welcome · Cot available',
-            amenity_1: 'Infinity pool<br><small style="font-size:0.6rem;opacity:0.5">5.5×3.5m · depth 0.8–1.6m</small>',
+            amenity_1: 'Infinity pool<br><small style="font-size:0.6rem;opacity:0.5">5.5 × 3.5m · depth 0.8–1.6m</small>',
             amenity_2: 'Outdoor bathtub',
             amenity_3: 'Panoramic sea view',
             amenity_4: 'Air conditioning<br><small style="font-size:0.6rem;opacity:0.5">All rooms</small>',
