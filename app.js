@@ -186,7 +186,7 @@ function isBlockedForArrival(d) {
     return blockedRanges.some(r => {
         const start = midnight(r.s).getTime();
         const end = midnight(r.e).getTime();
-        return t >= start && t < end;   // arrival day blocked only if inside occupied nights
+        return t > start && t < end;
     });
 }
 
@@ -195,12 +195,8 @@ function isBlockedForStay(d) {
     return blockedRanges.some(r => {
         const start = midnight(r.s).getTime();
         const end = midnight(r.e).getTime();
-        return t >= start && t < end;
+        return t > start && t < end;
     });
-}
-
-function isBlockedForDeparture(d) {
-    return false; // departure on another family's arrival day is allowed
 }
 
 function isOccupiedNight(d) {
@@ -208,7 +204,7 @@ function isOccupiedNight(d) {
     return blockedRanges.some(r => {
         const start = midnight(r.s).getTime();
         const end = midnight(r.e).getTime();
-        return t >= start && t < end;
+        return t > start && t < end;
     });
 }
 
