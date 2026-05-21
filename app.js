@@ -35,8 +35,6 @@ const CLEANING_FEE = 350; // € — frais de ménage fixes par séjour
 
 // Season-specific ranges (start/end inclusive) with weekly rates
 const SEASONS = [
-    { name: 'MARS', start: '2026-03-07', end: '2026-04-03', weekly: 3800 },
-    { name: 'AVRIL', start: '2026-04-04', end: '2026-05-08', weekly: 4200 },
     { name: 'PRINTEMPS', start: '2026-05-09', end: '2026-06-29', weekly: 2800 },
     { name: 'ÉTÉ', start: '2026-06-29', end: '2026-08-28', weekly: 3500 },
     { name: 'AUTOMNE', start: '2026-08-30', end: '2026-10-16', weekly: 2800 },
@@ -45,6 +43,8 @@ const SEASONS = [
     { name: 'VACANCES', start: '2026-12-19', end: '2027-01-01', weekly: 7500 },
     { name: 'MI-SAISON', start: '2027-01-02', end: '2027-02-05', weekly: 4000 },
     { name: 'HAUTE SAISON', start: '2027-02-06', end: '2027-03-05', weekly: 4600 }
+    { name: 'MARS', start: '2026-03-06', end: '2026-04-02', weekly: 3800 },
+    { name: 'AVRIL', start: '2026-04-03', end: '2026-04-30', weekly: 4200 },
 ];
 
 function getRate(d) {
