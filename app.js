@@ -35,17 +35,69 @@ const CLEANING_FEE = 350; // € — frais de ménage fixes par séjour
 
 // Season-specific ranges (start/end inclusive) with weekly rates
 const SEASONS = [
-    { name: 'PRINTEMPS', start: '2026-05-09', end: '2026-06-29', weekly: 2800 },
-    { name: 'ÉTÉ', start: '2026-06-29', end: '2026-08-28', weekly: 3500 },
-    { name: 'AUTOMNE', start: '2026-08-30', end: '2026-10-16', weekly: 2800 },
-    { name: 'TOUSSAINT', start: '2026-10-17', end: '2026-11-06', weekly: 3500 },
-    { name: 'PRÉ-HIVER', start: '2026-11-07', end: '2026-12-18', weekly: 3000 },
-    { name: 'VACANCES', start: '2026-12-19', end: '2027-01-01', weekly: 7500 },
-    { name: 'MI-SAISON', start: '2027-01-02', end: '2027-02-05', weekly: 4000 },
-    { name: 'HAUTE SAISON', start: '2027-02-06', end: '2027-03-05', weekly: 4600 }
-    { name: 'MARS', start: '2026-03-06', end: '2026-04-02', weekly: 3800 },
-    { name: 'AVRIL', start: '2026-04-03', end: '2026-04-30', weekly: 4200 },
+    { name: 'PRINTEMPS', nameEn: 'SPRING', start: '2026-05-09', end: '2026-06-29', weekly: 2800, minNights: 5 },
+    { name: 'ÉTÉ', nameEn: 'SUMMER', start: '2026-06-29', end: '2026-08-28', weekly: 3500, minNights: 7 },
+    { name: 'AUTOMNE', nameEn: 'AUTUMN', start: '2026-08-30', end: '2026-10-16', weekly: 2800, minNights: 5 },
+    { name: 'TOUSSAINT', nameEn: 'FALL BREAK', start: '2026-10-17', end: '2026-11-06', weekly: 3500, minNights: 7 },
+    { name: 'PRÉ-HIVER', nameEn: 'PRE-WINTER', start: '2026-11-07', end: '2026-12-18', weekly: 3000, minNights: 7 },
+    { name: 'VACANCES', nameEn: 'HOLIDAYS', start: '2026-12-19', end: '2027-01-01', weekly: 7500, minNights: 7, featured: true },
+    { name: 'MI-SAISON', nameEn: 'MID SEASON', start: '2027-01-02', end: '2027-02-05', weekly: 4000, minNights: 7 },
+    { name: 'HAUTE SAISON', nameEn: 'HIGH SEASON', start: '2027-02-06', end: '2027-03-05', weekly: 4600, minNights: 7 },
+    { name: 'MARS', nameEn: 'MARCH', start: '2027-03-06', end: '2027-04-02', weekly: 3800, minNights: 7 },
+    { name: 'AVRIL', nameEn: 'APRIL', start: '2027-04-03', end: '2027-05-07', weekly: 4200, minNights: 7 },
+    { name: 'PRINTEMPS', nameEn: 'SPRING', start: '2027-05-08', end: '2027-07-02', weekly: 2800, minNights: 5 },
+    { name: 'ÉTÉ', nameEn: 'SUMMER', start: '2027-07-03', end: '2027-09-03', weekly: 3500, minNights: 7 },
+    { name: 'AUTOMNE', nameEn: 'AUTUMN', start: '2027-09-04', end: '2027-10-15', weekly: 2800, minNights: 5 },
 ];
+
+function buildRateCards() {
+    const grid = document.getElementById('rates-grid');
+    if (!grid) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const locale = (typeof lang !== 'undefined' && lang === 'en') ? 'en-GB' : 'fr-FR';
+    const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+    const unitText = lang === 'en' ? 'Per week' : 'Par semaine';
+    const guestsText = lang === 'en' ? 'Up to 12 guests' : "Jusqu'à 12 personnes";
+    const chargesText = lang === 'en' ? 'All charges included' : 'Charges incluses';
+    const nightsText = lang === 'en' ? 'nights min' : 'nuits min';
+
+    grid.innerHTML = '';
+
+    SEASONS.forEach(s => {
+        // Parse both dates first
+        const [sy, sm, sd] = s.start.split('-').map(Number);
+        const [ey, em, ed] = s.end.split('-').map(Number);
+        const startDate = new Date(sy, sm - 1, sd);
+        const endDate = new Date(ey, em - 1, ed);
+
+        // Filter
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+        if (endDate < today) return;            // skip past seasons
+        if (startDate > oneYearFromNow) return; // skip beyond 1 year
+
+        // Build card
+        const displayName = (lang === 'en' && s.nameEn) ? s.nameEn : s.name;
+        const dateRange = `${startDate.toLocaleDateString(locale, opts)} – ${endDate.toLocaleDateString(locale, opts)}`;
+        const price = '€' + s.weekly.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        const minN = s.minNights || 7;
+
+        const card = document.createElement('div');
+        card.className = 'rate-card' + (s.featured ? ' featured' : '');
+        card.innerHTML = `
+        <div class="rate-season">${displayName}</div>
+        <div class="rate-name">${dateRange}</div>
+        <div class="rate-price">${price}</div>
+        <div class="rate-unit">${unitText}</div>
+        <div class="rate-details">${minN} ${nightsText}<br>${guestsText}<br>${chargesText}</div>
+    `;
+        card.style.cssText += ';opacity:0;transform:translateY(18px);transition:opacity 0.5s ease,transform 0.5s ease;';
+        obsEl.observe(card);
+        grid.appendChild(card);
+    });
+}
 
 function getRate(d) {
     // Helper: parse 'YYYY-MM-DD' as local midnight Date
@@ -61,7 +113,7 @@ function getRate(d) {
         if (d >= a && d < bEx) return { label: s.name, weekly: s.weekly };
     }
     // Fallback to a sensible default
-    return { label: 'Default', weekly: 2800 };
+    return { label: 'Default', weekly: 3200 };
 }
 function calcPrice(ci, co) {
     const nights = Math.round((co - ci) / 86400000);
@@ -581,26 +633,6 @@ const T = {
         // Rates
         rates_label: 'Tarification', rates_title: 'Tarifs <em>par saison</em>',
         rates_body: "Tarifs à la semaine pour l'ensemble de la villa — jusqu'à 12 personnes. Caution de 3 000 € / séjour, payable sur place.",
-        season1: 'MARS', season1_name: '7 Mar, 2026 - 3 Apr, 2026', season1_unit: 'Par semaine',
-        season1_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season2: 'AVRIL', season2_name: '4 Apr, 2026 - 8 May, 2026', season2_unit: 'Par semaine',
-        season2_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season3: 'PRINTEMPS', season3_name: '9 May, 2026 - 29 Jun, 2026', season3_unit: 'Par semaine',
-        season3_details: "5 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season4: 'ÉTÉ', season4_name: '29 Jun, 2026 - 28 Aug, 2026', season4_unit: 'Par semaine',
-        season4_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season5: 'AUTOMNE', season5_name: '30 Aug, 2026 - 16 Oct, 2026', season5_unit: 'Par semaine',
-        season5_details: "5 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season6: 'TOUSSAINT', season6_name: '17 Oct, 2026 - 6 Nov, 2026', season6_unit: 'Par semaine',
-        season6_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season7: 'PRÉ-HIVER', season7_name: '7 Nov, 2026 - 18 Dec, 2026', season7_unit: 'Par semaine',
-        season7_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season8: 'VACANCES', season8_name: '19 Dec, 2026 - 1 Jan, 2027', season8_unit: 'Par semaine',
-        season8_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season9: 'MI-SAISON', season9_name: '2 Jan, 2027 - 5 Feb, 2027', season9_unit: 'Par semaine',
-        season9_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
-        season10: 'HAUTE SAISON', season10_name: '6 Feb, 2027 - 5 Mar, 2027', season10_unit: 'Par semaine',
-        season10_details: "7 nights min<br>Jusqu'à 12 personnes · Charges incluses",
         deposit: 'Frais de ménage : <strong>350 €</strong> / séjour · Caution réservation directe : <strong>3 000 €</strong> (chèque/CB) · Taxe de séjour non incluse',
         rooms_label: 'Chambres',
         rooms_title: '4 chambres & une chambre dortoir',
@@ -860,37 +892,7 @@ function applyLang() {
         document.querySelector('.rates-header .section-label').textContent = t('rates_label');
         document.querySelector('.rates-header .section-title').innerHTML = t('rates_title');
         document.querySelector('.rates-header .section-body').textContent = t('rates_body');
-        const rateCards = document.querySelectorAll('.rate-card');
-        rateCards.forEach((card, i) => {
-            // season label key (season1, season2, ...)
-            const keyBase = 'season' + (i + 1);
-            const seasonLabel = T[l] && T[l][keyBase];
-            const seasonNameEl = card.querySelector('.rate-season');
-            if (seasonNameEl) {
-                if (seasonLabel) seasonNameEl.textContent = seasonLabel;
-                else if (SEASONS[i] && SEASONS[i].name) seasonNameEl.textContent = SEASONS[i].name;
-            }
-
-            // Localize the date range using the SEASONS array when available
-            const nameEl = card.querySelector('.rate-name');
-            if (nameEl && SEASONS[i]) {
-                try {
-                    const locale = l === 'en' ? 'en-GB' : 'fr-FR';
-                    const opts = { day: 'numeric', month: 'short', year: 'numeric' };
-                    const s = new Date(SEASONS[i].start);
-                    const e = new Date(SEASONS[i].end);
-                    nameEl.textContent = `${s.toLocaleDateString(locale, opts)} - ${e.toLocaleDateString(locale, opts)}`;
-                } catch (e) {
-                    // fallback: leave existing text
-                }
-            }
-
-            // Unit and details translate — use season1 keys as canonical where appropriate
-            const unitEl = card.querySelector('.rate-unit');
-            if (unitEl) unitEl.textContent = t('season1_unit');
-            const detailsEl = card.querySelector('.rate-details');
-            if (detailsEl) detailsEl.innerHTML = t('season1_details');
-        });
+        buildRateCards();
         document.querySelector('.deposit-note').innerHTML = t('deposit');
 
         // Booking
