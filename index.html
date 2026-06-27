@@ -4,16 +4,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Villa les Ondines 5★ — Anses d'Arlet, Martinique</title>
     <meta name="description"
         content="Villa les Ondines 5★ — 350m² face à la mer des Caraïbes. Piscine à débordement, 5 chambres, 5 salles de bain, vue panoramique sur Anses d'Arlet, Martinique.">
+
+    <!-- Canonical + favicon -->
+    <link rel="canonical" href="https://villaondines.com/">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn, iMessage previews) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Villa les Ondines">
+    <meta property="og:title" content="Villa les Ondines 5★ — Anses d'Arlet, Martinique">
+    <meta property="og:description"
+        content="350m² face à la mer des Caraïbes. Piscine à débordement, 5 chambres, vue panoramique sur Anses d'Arlet, Martinique.">
+    <meta property="og:url" content="https://villaondines.com/">
+    <meta property="og:image" content="https://villaondines.com/figures/villa-images/terasse1.jpg">
+    <meta property="og:image:alt" content="Vue sur la mer des Caraïbes depuis la terrasse de la Villa les Ondines">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:locale:alternate" content="en_GB">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Villa les Ondines 5★ — Anses d'Arlet, Martinique">
+    <meta name="twitter:description"
+        content="350m² face à la mer des Caraïbes. Piscine à débordement, 5 chambres, vue panoramique.">
+    <meta name="twitter:image" content="https://villaondines.com/figures/villa-images/terasse1.jpg">
+
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="app.js" defer></script>
 
-    
+    <!-- Structured data: helps Google understand this is a 5★ lodging -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LodgingBusiness",
+      "name": "Villa les Ondines",
+      "description": "Villa 5★ de 350m² face à la mer des Caraïbes aux Anses-d'Arlet, Martinique. Piscine à débordement, 5 chambres, 5 salles de bain, vue panoramique.",
+      "url": "https://villaondines.com/",
+      "email": "info@villaondines.com",
+      "image": [
+        "https://villaondines.com/figures/villa-images/terasse1.jpg",
+        "https://villaondines.com/figures/villa-images/salon1.jpg",
+        "https://villaondines.com/figures/villa-images/chambre1.jpg"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Lotissement la Batterie",
+        "addressLocality": "Les Anses-d'Arlet",
+        "postalCode": "97217",
+        "addressRegion": "Martinique",
+        "addressCountry": "FR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 14.4871,
+        "longitude": -61.0781
+      },
+      "starRating": { "@type": "Rating", "ratingValue": "5" },
+      "priceRange": "€2,800–€7,500 / semaine",
+      "numberOfRooms": 5,
+      "maximumAttendeeCapacity": 12,
+      "petsAllowed": false,
+      "smokingAllowed": false,
+      "amenityFeature": [
+        { "@type": "LocationFeatureSpecification", "name": "Piscine à débordement", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "Climatisation", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "WiFi gratuit", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "Parking gratuit", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "Vue mer", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "Accès PMR", "value": true }
+      ]
+    }
+    </script>
 </head>
 
 <body>
