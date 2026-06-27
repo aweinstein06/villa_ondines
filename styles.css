@@ -127,7 +127,7 @@ nav {
 .hero-photo {
     position: absolute;
     inset: 0;
-    background: url('https://location.archipelevasion.com/en/rentals/fotos/2/16302702129282fea0f9b8911e6e2567dca10e93eb/huge163027021405ac2e6127a94001a3282a4039da61a6.jpg') center/cover no-repeat;
+    background: url('figures/villa-images/terasse1.jpg') center/cover no-repeat;
     opacity: 0.42;
 }
 
@@ -421,7 +421,7 @@ nav {
 .about-photo-main {
     position: absolute;
     inset: 0;
-    background: url('https://location.archipelevasion.com/en/rentals/fotos/2/16302702129282fea0f9b8911e6e2567dca10e93eb/huge16302702152622fd168e2bca3e3244a780fcea420c.jpg') center/cover;
+    background: url('figures/villa-images/maison1.jpg') center/cover;
     transition: transform 0.6s ease;
 }
 
