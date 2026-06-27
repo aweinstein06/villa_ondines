@@ -436,9 +436,9 @@ function submitForm() {
     }
     const price = calcPrice(selStart, selEnd);
     const fmt = d => d.toLocaleDateString('fr-FR');
-    const sub = encodeURIComponent('Demande de réservation – Villa les Ondines, Martinique');
+    const sub = encodeURIComponent('Demande de réservation – Villa Ondines, Martinique');
     const body = encodeURIComponent(
-        `Bonjour,\n\nJe souhaite réserver la Villa les Ondines :\n\n` +
+        `Bonjour,\n\nJe souhaite réserver la Villa Ondines :\n\n` +
         `Arrivée    : ${fmt(selStart)}\nDépart     : ${fmt(selEnd)}\n` +
         `Durée      : ${price.nights} nuit(s)\nVoyageurs  : ${f('guests')}\n` +
         `Location   : ${price.rental.toLocaleString('fr-FR')} €\n` +
@@ -549,7 +549,7 @@ const T = {
         // About
         about_label: 'Environ la propriété',
         about_title: "Plus de 350 m²<br><em>face à l'horizon</em>",
-        about_p1: "L'arrivée à la Villa les Ondines est à vous couper le souffle. Entièrement tournée vers le large, elle offre une vue extraordinaire sur les eaux cristallines de la mer des Caraïbes. Entre camaïeux de bleus, mornes verdoyants et village pittoresque, le spectacle est à la hauteur.",
+        about_p1: "L'arrivée à la Villa Ondines est à vous couper le souffle. Entièrement tournée vers le large, elle offre une vue extraordinaire sur les eaux cristallines de la mer des Caraïbes. Entre camaïeux de bleus, mornes verdoyants et village pittoresque, le spectacle est à la hauteur.",
         about_p2: "Mariant architecture créole, matériaux modernes et couleurs actuelles, la villa est une adresse attachante où le charme opère vite. Le séjour et la cuisine, largement ouverts sur l'extérieur, donnent sur la piscine à débordement où ciel, mer et horizon semblent se fondre à l'infini.",
         feat1: 'Surface habitable', feat2: 'Chambres (5 SDB)', feat3: 'Piscine à débordement',
         feat4: 'Voyageurs max', feat5: 'De la plage', feat6: "De l'aéroport FDF",
@@ -628,7 +628,7 @@ const T = {
                 source: 'villaondines.com'
             },
             {
-                text: '« La villa Les Ondines est l\'une de ces adresses uniques qui laissent des souvenirs durables. La piscine à débordement face à la mer des Caraïbes… inoubliable. »',
+                text: '« La villa Ondines est l\'une de ces adresses uniques qui laissent des souvenirs durables. La piscine à débordement face à la mer des Caraïbes… inoubliable. »',
                 author: '— Famille Bertrand',
                 source: 'Archipel Évasion'
             }
@@ -650,7 +650,7 @@ const T = {
         // Contact
         contact_label: 'Contact direct', contact_title: 'Prenez <em>contact</em>',
         contact_meta: "Lotissement la Batterie · 97217 Les Anses-d'Arlet · Martinique (France)<br>GPS : <strong>14.4871°N, 61.0781°O</strong> · Arrêt de bus La Batterie à 1 min à pied<br><strong>Check-in :</strong> Contactez-nous 1 semaine avant pour donner votre n° de vol et heure d'arrivée · Réponse sous 24h",
-        footer_copy: "© 2026 Villa les Ondines · Les Anses-d'Arlet · Martinique",
+        footer_copy: "© 2026 Villa Ondines · Les Anses-d'Arlet · Martinique",
     },
     en: {
         nav_about: 'The Villa', nav_gallery: 'Photos', nav_amenities: 'Amenities',
@@ -665,7 +665,7 @@ const T = {
         scroll_hint: 'Discover',
         about_label: 'About the property',
         about_title: 'Over 350 m²<br><em>facing the horizon</em>',
-        about_p1: "Arriving at Villa les Ondines takes your breath away. Entirely facing the open sea, it offers an extraordinary view over the crystal-clear waters of the Caribbean. Between shades of blue, lush hills and the picturesque village, the scenery is simply spectacular.",
+        about_p1: "Arriving at Villa Ondines takes your breath away. Entirely facing the open sea, it offers an extraordinary view over the crystal-clear waters of the Caribbean. Between shades of blue, lush hills and the picturesque village, the scenery is simply spectacular.",
         about_p2: "Blending Creole architecture, modern materials and contemporary colours, the villa is a charming retreat where the magic works quickly. The living room and kitchen open wide onto the infinity pool, where sky, sea and horizon seem to merge into one.",
         feat1: 'Living space', feat2: 'Bedrooms (5 bathrooms)', feat3: 'Infinity pool',
         feat4: 'Max guests', feat5: 'From the beach', feat6: 'From FDF airport',
@@ -758,7 +758,7 @@ const T = {
                 source: 'villaondines.com'
             },
             {
-                text: '"Villa Les Ondines is one of those unique addresses that leave lasting memories. The infinity pool facing the Caribbean Sea… unforgettable."',
+                text: '"Villa Ondines is one of those unique addresses that leave lasting memories. The infinity pool facing the Caribbean Sea… unforgettable."',
                 author: '— Famille Bertrand',
                 source: 'Archipel Évasion'
             }
@@ -778,7 +778,7 @@ const T = {
         att5_desc: "Open-air museum tracing the lives of enslaved Africans in Martinique. Reconstructed Creole huts and ethnobotanical gardens.",
         contact_label: 'Direct contact', contact_title: 'Get in <em>touch</em>',
         contact_meta: "Lotissement la Batterie · 97217 Les Anses-d'Arlet · Martinique (France)<br>GPS: <strong>14.4871°N, 61.0781°E</strong> · Bus stop La Batterie, 1 min walk<br><strong>Check-in:</strong> Contact us 1 week before with your flight number and arrival time · Response within 24h",
-        footer_copy: "© 2026 Villa les Ondines · Les Anses-d'Arlet · Martinique",
+        footer_copy: "© 2026 Villa Ondines · Les Anses-d'Arlet · Martinique",
     }
 };
 
