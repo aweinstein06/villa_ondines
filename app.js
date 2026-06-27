@@ -539,7 +539,7 @@ const T = {
         nav_rates: 'Tarifs', nav_reviews: 'Avis', nav_book: 'Réserver',
         // Hero
         hero_eyebrow: "Martinique · Anses d'Arlet · Villa 5★",
-        hero_title: 'La Villa<br><em>les Ondines</em>',
+        hero_title: 'La Villa<br><em>Ondines</em>',
         hero_sub: "350m² entièrement tournés vers la mer des Caraïbes. Architecture créole, piscine à débordement et vue panoramique sur le village pittoresque d'Anses d'Arlet.",
         hero_badge1: '⭐ 4,92/5 Airbnb', hero_badge2: '🏆 Classement 5★ officiel',
         hero_badge3: '🚶 150m de la plage', hero_badge4: "✈️ 33km de l'aéroport",
@@ -656,7 +656,7 @@ const T = {
         nav_about: 'The Villa', nav_gallery: 'Photos', nav_amenities: 'Amenities',
         nav_rates: 'Rates', nav_reviews: 'Reviews', nav_book: 'Book Now',
         hero_eyebrow: "Martinique · Anses d'Arlet · 5★ Villa",
-        hero_title: 'Villa<br><em>les Ondines</em>',
+        hero_title: 'Villa<br><em>Ondines</em>',
         hero_sub: "350m² entirely facing the Caribbean Sea. Creole architecture, infinity pool and panoramic views over the picturesque village of Anses d'Arlet.",
         hero_badge1: '⭐ 4,92/5 Airbnb', hero_badge2: '🏆 Official 5★ rating',
         hero_badge3: '🚶 150m from the beach', hero_badge4: '✈️ 33km from airport',
