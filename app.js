@@ -189,77 +189,33 @@ function setDot(state, msg) {
 }
 
 async function loadICal() {
-    setDot('loading');
-    // Apply manual blocks right away so calendar is usable immediately
+    // Manual blocks render immediately so the calendar is usable right away
     applyAllBlocks([]);
-
-    const proxies = [
-        { mk: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, json: true },
-        { mk: u => `https://corsproxy.io/?${encodeURIComponent(u)}`, json: false },
-        { mk: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, json: false },
-    ];
-
-    for (const { mk, json } of proxies) {
-        try {
-            const res = await fetch(mk(ICAL_URL), { signal: AbortSignal.timeout(10000) });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const ics = json ? (await res.json()).contents : await res.text();
-            if (!ics || !ics.includes('BEGIN:VCALENDAR')) throw new Error('Not a valid iCal');
-
-            const icalRanges = parseICS(ics);
-
-            applyAllBlocks(icalRanges);
-
-            const ni = icalRanges.length, nm = MANUAL_BLOCKS.length;
-            const parts = [];
-            if (ni > 0) parts.push(ni + ' réservation' + (ni > 1 ? 's' : '') + ' Avantio');
-            if (nm > 0) parts.push(nm + ' bloc' + (nm > 1 ? 's' : '') + ' manuel' + (nm > 1 ? 's' : ''));
-            setDot('ok');
-            return;
-        } catch (err) {
-            // try next proxy
-        }
+    try {
+        const res = await fetch('/.netlify/functions/ical', { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const ics = await res.text();
+        if (!ics.includes('BEGIN:VCALENDAR')) throw new Error('Not a valid iCal');
+        applyAllBlocks(parseICS(ics));
+    } catch (err) {
+        console.warn('iCal sync failed — manual blocks still active:', err);
     }
-
-    // All proxies failed — manual blocks still work fine
-    const nm = MANUAL_BLOCKS.length;
-    setDot('warn',
-        nm > 0
-            ? '⚠ Synchro Avantio indisponible — ' + nm + ' bloc' + (nm > 1 ? 's' : '') + ' manuel' + (nm > 1 ? 's' : '') + ' actif' + (nm > 1 ? 's' : '')
-            : '⚠ Synchro automatique indisponible — vérifiez les disponibilités par email'
-    );
 }
 
 // ── CALENDAR ─────────────────────────────────────────────────────
 function midnight(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 function sameDay(a, b) { return a && b && midnight(a).getTime() === midnight(b).getTime(); }
-function isBlockedForArrival(d) {
+function isNightBooked(d) {
     const t = midnight(d).getTime();
     return blockedRanges.some(r => {
         const start = midnight(r.s).getTime();
         const end = midnight(r.e).getTime();
-        return t > start && t < end;
+        return t >= start && t < end;   // arrival day occupied; checkout day free
     });
 }
-
-function isBlockedForStay(d) {
-    const t = midnight(d).getTime();
-    return blockedRanges.some(r => {
-        const start = midnight(r.s).getTime();
-        const end = midnight(r.e).getTime();
-        return t > start && t < end;
-    });
-}
-
-function isOccupiedNight(d) {
-    const t = midnight(d).getTime();
-    return blockedRanges.some(r => {
-        const start = midnight(r.s).getTime();
-        const end = midnight(r.e).getTime();
-        return t > start && t < end;
-    });
-}
-
+const isBlockedForArrival = isNightBooked;
+const isBlockedForStay = isNightBooked;
+const isOccupiedNight = isNightBooked;
 function canArrive(d) {
     return !isOccupiedNight(d);
 }
