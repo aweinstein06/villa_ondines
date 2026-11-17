@@ -116,6 +116,7 @@ function buildRateCards() {
 }
 
 function getRate(d) {
+    if (midnight(d).getTime() >= horizonDate().getTime()) return null; // more than a year ahead → price on request
     // Helper: parse 'YYYY-MM-DD' as local midnight Date
     const parse = s => {
         const [y, m, day] = s.split('-').map(Number);
@@ -241,14 +242,12 @@ function canDepart(d) {
 
 function isPast(d) { return midnight(d).getTime() < midnight(new Date()).getTime(); }
 
-// ── BOOKING HORIZON ── guests can only see/book up to this many months ahead (rolling)
+// ── PRICE HORIZON ── prices are shown up to this many months ahead (rolling); later dates = "sur demande"
 const BOOKING_HORIZON_MONTHS = 12;
 function horizonDate() {
     const t = midnight(new Date());
     return new Date(t.getFullYear(), t.getMonth() + BOOKING_HORIZON_MONTHS, t.getDate());
 }
-// Last bookable night is the day before the horizon; the horizon day itself is allowed as departure
-function isBeyondHorizon(d) { return midnight(d).getTime() > horizonDate().getTime(); }
 function monthIndex(y, m) { return y * 12 + m; }
 
 let viewYear = new Date().getFullYear();
@@ -264,9 +263,6 @@ function prevMonths() {
     buildCalendars();
 }
 function nextMonths() {
-    const h = horizonDate();
-    const numMonths = window.innerWidth < 700 ? 1 : 2;
-    if (monthIndex(viewYear, viewMonth) + numMonths - 1 >= monthIndex(h.getFullYear(), h.getMonth())) return;
     viewMonth++;
     if (viewMonth > 11) { viewMonth = 0; viewYear++; }
     buildCalendars();
@@ -280,14 +276,13 @@ function buildCalendars() {
     const locale = (typeof lang !== 'undefined' && lang === 'en') ? 'en-GB' : 'fr-FR';
     const numMonths = window.innerWidth < 700 ? 1 : 2;
     // Keep the view within [current month, horizon month]
-    const now = new Date(), h = horizonDate();
+    const now = new Date();
     const minIdx = monthIndex(now.getFullYear(), now.getMonth());
-    const maxIdx = Math.max(minIdx, monthIndex(h.getFullYear(), h.getMonth()) - numMonths + 1);
-    const idx = Math.min(Math.max(monthIndex(viewYear, viewMonth), minIdx), maxIdx);
+    const idx = Math.max(monthIndex(viewYear, viewMonth), minIdx);
     viewYear = Math.floor(idx / 12); viewMonth = idx % 12;
     document.querySelectorAll('.cal-btn').forEach(b => {
         const isPrev = b.getAttribute('onclick') === 'prevMonths()';
-        const off = isPrev ? idx <= minIdx : idx >= maxIdx;
+        const off = isPrev && idx <= minIdx;
         b.disabled = off;
         b.style.opacity = off ? '0.25' : '';
         b.style.cursor = off ? 'default' : '';
@@ -341,7 +336,7 @@ function makeMonth(y, m) {
 
     for (let dn = 1; dn <= dim; dn++) {
         const date = new Date(y, m, dn);
-        const past = isPast(date) || isBeyondHorizon(date);
+        const past = isPast(date);
         const selectingDeparture = !!selStart && !selEnd;
         const bl = selectingDeparture ? false : !canArrive(date);
         const ss = sameDay(date, selStart);
@@ -394,7 +389,7 @@ function makeMonth(y, m) {
 
 function onDateClick(date) {
     document.getElementById('unavail-banner').style.display = 'none';
-    if (isPast(date) || isBeyondHorizon(date)) return;
+    if (isPast(date)) return;
 
     if (!selStart || selEnd) {
         if (isBlockedForArrival(date) || isPast(date)) return;
