@@ -33,22 +33,39 @@ document.querySelectorAll('.feature,.amenity-item,.review-card,.att-card,.rate-c
 // ── PRICING ──────────────────────────────────────────────────────
 const CLEANING_FEE = 350; // € — frais de ménage fixes par séjour
 
-// Season-specific ranges (start/end inclusive) with weekly rates
-const SEASONS = [
-    { name: 'PRINTEMPS', nameEn: 'SPRING', start: '2026-05-09', end: '2026-06-29', weekly: 2800, minNights: 5 },
-    { name: 'ÉTÉ', nameEn: 'SUMMER', start: '2026-06-29', end: '2026-08-28', weekly: 3500, minNights: 7 },
-    { name: 'AUTOMNE', nameEn: 'AUTUMN', start: '2026-08-30', end: '2026-10-16', weekly: 2800, minNights: 5 },
-    { name: 'TOUSSAINT', nameEn: 'FALL BREAK', start: '2026-10-17', end: '2026-11-06', weekly: 3500, minNights: 7 },
-    { name: 'PRÉ-HIVER', nameEn: 'PRE-WINTER', start: '2026-11-07', end: '2026-12-18', weekly: 3000, minNights: 7 },
-    { name: 'VACANCES', nameEn: 'HOLIDAYS', start: '2026-12-19', end: '2027-01-01', weekly: 7500, minNights: 7, featured: true },
-    { name: 'MI-SAISON', nameEn: 'MID SEASON', start: '2027-01-02', end: '2027-02-05', weekly: 4000, minNights: 7 },
-    { name: 'HAUTE SAISON', nameEn: 'HIGH SEASON', start: '2027-02-06', end: '2027-03-05', weekly: 4600, minNights: 7 },
-    { name: 'MARS', nameEn: 'MARCH', start: '2027-03-06', end: '2027-04-02', weekly: 3800, minNights: 7 },
-    { name: 'AVRIL', nameEn: 'APRIL', start: '2027-04-03', end: '2027-05-07', weekly: 4200, minNights: 7 },
-    { name: 'PRINTEMPS', nameEn: 'SPRING', start: '2027-05-08', end: '2027-07-02', weekly: 2800, minNights: 5 },
-    { name: 'ÉTÉ', nameEn: 'SUMMER', start: '2027-07-03', end: '2027-09-03', weekly: 3500, minNights: 7 },
-    { name: 'AUTOMNE', nameEn: 'AUTUMN', start: '2027-09-04', end: '2027-10-15', weekly: 2800, minNights: 5 },
-];
+// ✏️  SEASON PRICES — the only thing to edit. Season DATES are computed automatically
+// from the official French school calendar (zones A/B/C) by netlify/functions/seasons.js
+const SEASON_RATES = {
+    automne:   { name: 'AUTOMNE',      nameEn: 'AUTUMN',      weekly: 2800, minNights: 5 },
+    toussaint: { name: 'TOUSSAINT',    nameEn: 'FALL BREAK',  weekly: 3500, minNights: 7 },
+    prehiver:  { name: 'PRÉ-HIVER',    nameEn: 'PRE-WINTER',  weekly: 3000, minNights: 7 },
+    vacances:  { name: 'VACANCES',     nameEn: 'HOLIDAYS',    weekly: 7500, minNights: 7, featured: true },
+    misaison:  { name: 'MI-SAISON',    nameEn: 'MID SEASON',  weekly: 4000, minNights: 7 },
+    haute:     { name: 'HAUTE SAISON', nameEn: 'HIGH SEASON', weekly: 4600, minNights: 7 },
+    mars:      { name: 'MARS',         nameEn: 'MARCH',       weekly: 3800, minNights: 7 },
+    avril:     { name: 'AVRIL',        nameEn: 'APRIL',       weekly: 4200, minNights: 7 },
+    printemps: { name: 'PRINTEMPS',    nameEn: 'SPRING',      weekly: 2800, minNights: 5 },
+    ete:       { name: 'ÉTÉ',          nameEn: 'SUMMER',      weekly: 3500, minNights: 7 },
+};
+
+// Filled by loadSeasons(). Dates with no season show "price on request" — never a guessed price.
+let SEASONS = [];
+
+async function loadSeasons() {
+    try {
+        const res = await fetch('/.netlify/functions/seasons', { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        SEASONS = data.seasons
+            .filter(x => SEASON_RATES[x.key])
+            .map(x => ({ ...SEASON_RATES[x.key], start: x.start, end: x.end }));
+    } catch (err) {
+        console.warn('Season dates unavailable — prices shown on request:', err);
+        SEASONS = [];
+    }
+    buildRateCards();
+    buildCalendars();
+}
 
 function buildRateCards() {
     const grid = document.getElementById('rates-grid');
@@ -71,16 +88,15 @@ function buildRateCards() {
         const [ey, em, ed] = s.end.split('-').map(Number);
         const startDate = new Date(sy, sm - 1, sd);
         const endDate = new Date(ey, em - 1, ed);
+        const changeover = new Date(ey, em - 1, ed + 1);   // shown as Saturday → Saturday
 
         // Filter
-        const oneYearFromNow = new Date();
-        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
-        if (endDate < today) return;            // skip past seasons
-        if (startDate > oneYearFromNow) return; // skip beyond 1 year
+        if (endDate < today) return;               // skip past seasons
+        if (startDate > horizonDate()) return;     // skip beyond booking horizon
 
         // Build card
         const displayName = (lang === 'en' && s.nameEn) ? s.nameEn : s.name;
-        const dateRange = `${startDate.toLocaleDateString(locale, opts)} – ${endDate.toLocaleDateString(locale, opts)}`;
+        const dateRange = `${startDate.toLocaleDateString(locale, opts)} – ${changeover.toLocaleDateString(locale, opts)}`;
         const price = '€' + s.weekly.toLocaleString('en-US', { minimumFractionDigits: 2 });
         const minN = s.minNights || 7;
 
@@ -110,10 +126,9 @@ function getRate(d) {
         const a = parse(s.start);
         const b = parse(s.end);
         const bEx = new Date(b.getFullYear(), b.getMonth(), b.getDate() + 1);
-        if (d >= a && d < bEx) return { label: s.name, weekly: s.weekly };
+        if (d >= a && d < bEx) return { label: (lang === 'en' && s.nameEn) ? s.nameEn : s.name, weekly: s.weekly };
     }
-    // Fallback to a sensible default
-    return { label: 'Default', weekly: 3200 };
+    return null; // no season known for this date → price on request
 }
 function calcPrice(ci, co) {
     const nights = Math.round((co - ci) / 86400000);
@@ -122,6 +137,7 @@ function calcPrice(ci, co) {
     for (let i = 0; i < nights; i++) {
         const d = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate() + i);
         const r = getRate(d);
+        if (!r) return { nights, total: null };
         const pn = r.weekly / 7;
         rental += pn;
         if (!bk[r.label]) bk[r.label] = { n: 0, pn };
@@ -140,7 +156,6 @@ const MANUAL_BLOCKS = [
 ];
 
 // ── iCAL AUTO-SYNC (Avantio) ──────────────────────────────────────
-const ICAL_URL = 'https://calendar.avantio.pro/v1/174e5151-9f4e-4885-a2b7-85574d33fd68.ics';
 let blockedRanges = [];
 
 function parseDateStr(str) { // 'YYYY-MM-DD' -> local midnight Date
@@ -226,17 +241,32 @@ function canDepart(d) {
 
 function isPast(d) { return midnight(d).getTime() < midnight(new Date()).getTime(); }
 
+// ── BOOKING HORIZON ── guests can only see/book up to this many months ahead (rolling)
+const BOOKING_HORIZON_MONTHS = 12;
+function horizonDate() {
+    const t = midnight(new Date());
+    return new Date(t.getFullYear(), t.getMonth() + BOOKING_HORIZON_MONTHS, t.getDate());
+}
+// Last bookable night is the day before the horizon; the horizon day itself is allowed as departure
+function isBeyondHorizon(d) { return midnight(d).getTime() > horizonDate().getTime(); }
+function monthIndex(y, m) { return y * 12 + m; }
+
 let viewYear = new Date().getFullYear();
 let viewMonth = new Date().getMonth();
 let selStart = null;
 let selEnd = null;
 
 function prevMonths() {
+    const now = new Date();
+    if (monthIndex(viewYear, viewMonth) <= monthIndex(now.getFullYear(), now.getMonth())) return;
     viewMonth--;
     if (viewMonth < 0) { viewMonth = 11; viewYear--; }
     buildCalendars();
 }
 function nextMonths() {
+    const h = horizonDate();
+    const numMonths = window.innerWidth < 700 ? 1 : 2;
+    if (monthIndex(viewYear, viewMonth) + numMonths - 1 >= monthIndex(h.getFullYear(), h.getMonth())) return;
     viewMonth++;
     if (viewMonth > 11) { viewMonth = 0; viewYear++; }
     buildCalendars();
@@ -249,6 +279,19 @@ function buildCalendars() {
     lbls.innerHTML = '';
     const locale = (typeof lang !== 'undefined' && lang === 'en') ? 'en-GB' : 'fr-FR';
     const numMonths = window.innerWidth < 700 ? 1 : 2;
+    // Keep the view within [current month, horizon month]
+    const now = new Date(), h = horizonDate();
+    const minIdx = monthIndex(now.getFullYear(), now.getMonth());
+    const maxIdx = Math.max(minIdx, monthIndex(h.getFullYear(), h.getMonth()) - numMonths + 1);
+    const idx = Math.min(Math.max(monthIndex(viewYear, viewMonth), minIdx), maxIdx);
+    viewYear = Math.floor(idx / 12); viewMonth = idx % 12;
+    document.querySelectorAll('.cal-btn').forEach(b => {
+        const isPrev = b.getAttribute('onclick') === 'prevMonths()';
+        const off = isPrev ? idx <= minIdx : idx >= maxIdx;
+        b.disabled = off;
+        b.style.opacity = off ? '0.25' : '';
+        b.style.cursor = off ? 'default' : '';
+    });
     for (let i = 0; i < numMonths; i++) {
         let m = viewMonth + i, y = viewYear;
         if (m > 11) { m -= 12; y++; }
@@ -298,7 +341,7 @@ function makeMonth(y, m) {
 
     for (let dn = 1; dn <= dim; dn++) {
         const date = new Date(y, m, dn);
-        const past = isPast(date);
+        const past = isPast(date) || isBeyondHorizon(date);
         const selectingDeparture = !!selStart && !selEnd;
         const bl = selectingDeparture ? false : !canArrive(date);
         const ss = sameDay(date, selStart);
@@ -351,6 +394,7 @@ function makeMonth(y, m) {
 
 function onDateClick(date) {
     document.getElementById('unavail-banner').style.display = 'none';
+    if (isPast(date) || isBeyondHorizon(date)) return;
 
     if (!selStart || selEnd) {
         if (isBlockedForArrival(date) || isPast(date)) return;
@@ -410,14 +454,17 @@ function updateSummary() {
     const fmtL = d => d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('date-summary').textContent = `${fmtL(selStart)} → ${fmtL(selEnd)}`;
     document.getElementById('nights-summary').textContent = `${price.nights} ${lang === 'fr' ? 'nuit' : 'night'}${price.nights > 1 ? 's' : ''}`;
-    document.getElementById('price-total').textContent = `${price.total.toLocaleString('fr-FR')} €`;
-    const rateLabel = lang === 'fr' ? Object.entries(price.bk).map(([l, { n, pn }]) => `${l} (${n}n × ${Math.round(pn)}€/n)`).join(' + ')
-        : Object.entries(price.bk).map(([l, { n, pn }]) => {
-            const en = { 'Mars': 'March', 'Avril': 'April', 'Printemps': 'Spring', 'Été': 'Summer', 'Automne': 'Autumn', 'Toussaint': 'All Saints', 'Pré-Hiver': 'Pre-Winter', 'Vacances': 'Holidays', 'Mi-Saison': 'Mid-Season', 'Haute Saison': 'High Season' };
-            return `${en[l] || l} (${n}n × ${Math.round(pn)}€/n)`;
-        }).join(' + ');
-    document.getElementById('price-breakdown').textContent = rateLabel
-        + ` + ${lang === 'fr' ? 'ménage' : 'cleaning'} ${CLEANING_FEE.toLocaleString('fr-FR')} €`;
+    if (price.total === null) {
+        document.getElementById('price-total').textContent = lang === 'fr' ? 'Sur demande' : 'On request';
+        document.getElementById('price-breakdown').textContent = lang === 'fr'
+            ? 'Tarif communiqué sur demande pour ces dates'
+            : 'Rate for these dates available on request';
+    } else {
+        document.getElementById('price-total').textContent = `${price.total.toLocaleString('fr-FR')} €`;
+        const rateLabel = Object.entries(price.bk).map(([l, { n, pn }]) => `${l} (${n}n × ${Math.round(pn)}€/n)`).join(' + ');
+        document.getElementById('price-breakdown').textContent = rateLabel
+            + ` + ${lang === 'fr' ? 'ménage' : 'cleaning'} ${CLEANING_FEE.toLocaleString('fr-FR')} €`;
+    }
     const pw = document.getElementById('price-warning');
     if (price.nights < 7) {
         pw.textContent = lang === 'fr'
@@ -429,9 +476,11 @@ function updateSummary() {
 
 function submitForm() {
     const f = id => document.getElementById(id).value.trim();
+    const status = document.getElementById('ical-status');
     if (!f('fname') || !f('email') || !f('guests') || !selStart || !selEnd) {
-        const icalStatus = document.getElementById('ical-status');
-        if (icalStatus) icalStatus.textContent = '⚠ Veuillez remplir tous les champs et sélectionner vos dates.';
+        if (status) status.textContent = lang === 'fr'
+            ? '⚠ Veuillez remplir tous les champs et sélectionner vos dates.'
+            : '⚠ Please fill in all required fields and select your dates.';
         setDot('error'); return;
     }
     const price = calcPrice(selStart, selEnd);
@@ -441,9 +490,10 @@ function submitForm() {
         `Bonjour,\n\nJe souhaite réserver la Villa Ondines :\n\n` +
         `Arrivée    : ${fmt(selStart)}\nDépart     : ${fmt(selEnd)}\n` +
         `Durée      : ${price.nights} nuit(s)\nVoyageurs  : ${f('guests')}\n` +
+        (price.total === null ? `Tarif      : sur demande\n\n` :
         `Location   : ${price.rental.toLocaleString('fr-FR')} €\n` +
         `Ménage     : ${price.cleaning.toLocaleString('fr-FR')} €\n` +
-        `TOTAL      : ${price.total.toLocaleString('fr-FR')} €\n\n` +
+        `TOTAL      : ${price.total.toLocaleString('fr-FR')} €\n\n`) +
         `Nom   : ${f('fname')} ${f('lname')}\nEmail : ${f('email')}\n` +
         `Tél   : ${f('phone') || 'Non renseigné'}\n\nMessage :\n${f('message') || '–'}\n\nCordialement,\n${f('fname')}`
     );
@@ -454,7 +504,6 @@ function submitForm() {
 (function () {
     const lb = document.getElementById('lightbox');
     const gallery = document.querySelector('.gallery-grid');
-    console.log('Lightbox IIFE start', { lb, gallery });
     if (!lb) return;
     const lbImg = lb.querySelector('.lightbox-img');
     const lbClose = lb.querySelector('.lightbox-close');
@@ -464,18 +513,17 @@ function submitForm() {
     let imgs = [];
     let idx = 0;
 
-    function refreshImgs() { imgs = Array.from(document.querySelectorAll('.gallery-grid .gallery-item img')); console.log('refreshImgs ->', imgs.length); }
+    function refreshImgs() { imgs = Array.from(document.querySelectorAll('.gallery-grid .gallery-item img')); }
     function openAt(i) {
-        if (!imgs.length) { refreshImgs(); if (!imgs.length) { console.log('no imgs to open'); return; } }
+        if (!imgs.length) { refreshImgs(); if (!imgs.length) return; }
         idx = (i + imgs.length) % imgs.length;
-        console.log('openAt', idx, imgs[idx] && imgs[idx].src);
         lbImg.src = imgs[idx].src;
         lbImg.alt = imgs[idx].alt || '';
         lb.classList.add('open');
         lb.setAttribute('aria-hidden', 'false');
         updateCounter();
     }
-    function close() { console.log('lightbox close'); lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); }
+    function close() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); }
     function prev() { openAt(idx - 1); }
     function next() { openAt(idx + 1); }
     function updateCounter() { if (lbCounter) lbCounter.textContent = `${idx + 1} / ${imgs.length}`; }
@@ -487,14 +535,12 @@ function submitForm() {
             const item = e.target.closest ? e.target.closest('.gallery-item') : null;
             if (!item || !gallery.contains(item)) return;
             let img = item.querySelector('img');
-            console.log('gallery click', { target: e.target, item, img });
 
             // If no <img> element, try to read a CSS background-image on the item
             if (!img) {
                 const bg = window.getComputedStyle(item).backgroundImage;
                 if (bg && bg !== 'none') {
                     const url = bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-                    console.log('found background image URL', url);
                     // open lightbox with this url (not part of imgs array)
                     e.preventDefault();
                     if (lbImg) {
@@ -512,7 +558,6 @@ function submitForm() {
 
             refreshImgs();
             const i = imgs.indexOf(img);
-            console.log('clicked image index', i);
             if (i >= 0) { e.preventDefault(); openAt(i); }
         });
     }
@@ -650,7 +695,7 @@ const T = {
         // Contact
         contact_label: 'Contact direct', contact_title: 'Prenez <em>contact</em>',
         contact_meta: "Lotissement la Batterie · 97217 Les Anses-d'Arlet · Martinique (France)<br>GPS : <strong>14.4871°N, 61.0781°O</strong> · Arrêt de bus La Batterie à 1 min à pied<br><strong>Check-in :</strong> Contactez-nous 1 semaine avant pour donner votre n° de vol et heure d'arrivée · Réponse sous 24h",
-        footer_copy: "© 2026 Villa Ondines · Les Anses-d'Arlet · Martinique",
+        footer_copy: "© " + new Date().getFullYear() + " Villa Ondines · Les Anses-d'Arlet · Martinique",
     },
     en: {
         nav_about: 'The Villa', nav_gallery: 'Photos', nav_amenities: 'Amenities',
@@ -701,26 +746,6 @@ const T = {
         amenity_22: '150m² of terraces',
         rates_label: 'Pricing', rates_title: 'Rates <em>by season</em>',
         rates_body: "Weekly rates for the entire villa — up to 12 guests. Security deposit of €3,000 per stay, payable on arrival.",
-        season1: 'MARCH', season1_name: '7 Mar, 2026 - 3 Apr, 2026', season1_unit: 'Per week',
-        season1_details: '7 nights min<br>Up to 12 guests<br>All charges included',
-        season2: 'APRIL', season2_name: '4 Apr, 2026 - 8 May, 2026', season2_unit: 'Per week',
-        season2_details: '7 nights min<br>Up to 12 guests<br>All charges included',
-        season3: 'SPRING', season3_name: '9 May, 2026 - 29 Jun, 2026', season3_unit: 'Per week',
-        season3_details: '5 nights min<br>Up to 12 guests<br>All charges included',
-        season4: 'SUMMER', season4_name: '29 Jun, 2026 - 28 Aug, 2026', season4_unit: 'Per week',
-        season4_details: '7 nights min<br>Up to 12 guests<br>All charges included',
-        season5: 'AUTUMN', season5_name: '30 Aug, 2026 - 16 Oct, 2026', season5_unit: 'Per week',
-        season5_details: '5 nights min<br>Up to 12 guests<br>All charges included',
-        season6: 'FALL BREAK', season6_name: '17 Oct, 2026 - 6 Nov, 2026', season6_unit: 'Per week',
-        season6_details: '7 nights min<br>Up to 12 guests<br>All charges included',
-        season7: 'PRE-WINTER', season7_name: '7 Nov, 2026 - 18 Dec, 2026', season7_unit: 'Per week',
-        season7_details: '7 nights min<br>Up to 12 guests<br>All charges included',
-        season8: 'HOLIDAYS', season8_name: '19 Dec, 2026 - 1 Jan, 2027', season8_unit: 'Per week',
-        season8_details: '7 nights min<br>Up to 12 guests<br>All charges included',
-        season9: 'MID SEASON', season9_name: '2 Jan, 2027 - 5 Feb, 2027', season9_unit: 'Per week',
-        season9_details: '7 nights min<br>Up to 12 guests<br>All charges included',
-        season10: 'HIGH SEASON', season10_name: '6 Feb, 2027 - 5 Mar, 2027', season10_unit: 'Per week',
-        season10_details: '7 nights min<br>Up to 12 guests<br>All charges included',
         deposit: 'Cleaning fee: <strong>€350</strong> per stay · Direct booking deposit: <strong>€3,000</strong> (cheque/CC) · Tourist tax not included',
         rooms_label: 'Bedrooms',
         rooms_title: '4 double beds & a dormitory',
@@ -778,7 +803,7 @@ const T = {
         att5_desc: "Open-air museum tracing the lives of enslaved Africans in Martinique. Reconstructed Creole huts and ethnobotanical gardens.",
         contact_label: 'Direct contact', contact_title: 'Get in <em>touch</em>',
         contact_meta: "Lotissement la Batterie · 97217 Les Anses-d'Arlet · Martinique (France)<br>GPS: <strong>14.4871°N, 61.0781°E</strong> · Bus stop La Batterie, 1 min walk<br><strong>Check-in:</strong> Contact us 1 week before with your flight number and arrival time · Response within 24h",
-        footer_copy: "© 2026 Villa Ondines · Les Anses-d'Arlet · Martinique",
+        footer_copy: "© " + new Date().getFullYear() + " Villa Ondines · Les Anses-d'Arlet · Martinique",
     }
 };
 
@@ -948,42 +973,21 @@ function applyLang() {
 function toggleLang() {
     const old = lang;
     const nw = old === 'fr' ? 'en' : 'fr';
-    console.log('toggleLang()', old, '->', nw);
     lang = nw;
     applyLang();
 }
 
 // ── INIT ─────────────────────────────────────────────────────────
-// Expose for inline handlers just in case and attach a safe event listener
-// Expose for inline handlers just in case and attach a safe event listener
 window.toggleLang = toggleLang;
-const __langBtn = (typeof document !== 'undefined' && document.getElementById) ? document.getElementById('lang-toggle') : null;
-if (__langBtn) {
-    console.log('lang-toggle: found button element', __langBtn);
-    try { __langBtn.removeAttribute('onclick'); } catch (e) { }
-    try {
-        __langBtn.addEventListener('click', function (e) { try { e.preventDefault(); } catch (er) { } console.log('lang-toggle clicked (direct)'); toggleLang(); });
-        __langBtn.addEventListener('pointerdown', function (e) { try { e.preventDefault(); } catch (er) { } console.log('lang-toggle pointerdown'); toggleLang(); });
-        __langBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { try { e.preventDefault(); } catch (er) { } console.log('lang-toggle keydown', e.key); toggleLang(); } });
-    } catch (ex) { console.warn('lang-toggle: failed to attach direct listeners', ex); }
-} else {
-    console.log('lang-toggle: button not found at init');
-}
-// Delegated handler as a fallback if the button is moved or not present at init
 document.addEventListener('click', function (e) {
-    const btn = e.target && e.target.closest ? e.target.closest('#lang-toggle') : null;
-    if (btn) {
-        try { e.preventDefault(); } catch (er) { }
-        console.log('lang-toggle clicked (delegated)');
-        toggleLang();
-    }
+    if (e.target.closest && e.target.closest('#lang-toggle')) { e.preventDefault(); toggleLang(); }
 });
 
 // Apply current language then initialize UI
-console.log('i18n init — current lang:', lang);
 applyLang();
 buildCalendars();
 loadICal();
+loadSeasons();
 window.addEventListener('resize', buildCalendars);
 
 
